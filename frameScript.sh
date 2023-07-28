@@ -6,11 +6,6 @@ then
   export $(cat .env | xargs)
 fi
 
-# TODO: make sure I'm connected via ADB
-# TODO: adb tcpip 5555
-# TODO: Restart machine hourly
-# TODO: Make sure I have a network connection, if not try to connect using credentials stored on the frame
-
 LOG=""
 log ()
 {
