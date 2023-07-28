@@ -26,6 +26,41 @@ log "-----------------------------------------"
 DATE=$($ADB date +%s | tr -d '\r')
 log "DATE: $DATE"
 
+PINGRESULT=$($ADB ping -c 1 google.com | tr -d '\n' | tr -d '\r')
+log "PINGRESULT: $PINGRESULT"
+
+PINGERROR=$?
+log "PINGERROR: $PINGERROR"
+
+if [ $PINGERROR -eq 0 ]; then
+	NETWORK_STATUS="connected"
+else
+	NETWORK_STATUS="disconnected"
+fi
+log "NETWORK_STATUS: $NETWORK_STATUS"
+
+WIFI_SSID=$($ADB su 0 cat /data/misc/wifi/wpa_supplicant.conf | grep ssid | cut -d "\"" -f 2 | tr -d '\r')
+log "WIFI_SSID: $WIFI_SSID"
+
+WIFI_PASSWORD=$($ADB su 0 cat /data/misc/wifi/wpa_supplicant.conf | grep psk | cut -d "\"" -f 2 | tr -d '\r')
+log "WIFI_PASSWORD: $WIFI_PASSWORD"
+
+if [ $PINGERROR -ne 0 ]; then
+	grep "$WIFI_SSID" /etc/wpa_supplicant/wpa_supplicant.conf
+	WIFI_EXISTS=$?
+	if [ $WIFI_EXISTS -ne 0 ]; then
+		# Scrape wifi ssid and password and set it up.
+		log "Adding new wireless network to config and resetting the config, cc @drew"
+		wpa_passphrase "$WIFI_SSID" "$WIFI_PASSWORD" | tee -a /etc/wpa_supplicant/wpa_supplicant.conf
+		wpa_cli reconfigure
+		# Sleep a minute to maybe have the curl below work.
+		sleep 60
+	else
+		log "No network connection but the wifi appears to be configured properly. Weird! cc @drew"
+	fi
+fi
+
+# Start collecting data to upload
 # get ip
 IP_COMMAND="ip -4 a show wlan0 | grep -o -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | head -1"
 IP="$($ADB $IP_COMMAND | tr -d '\r')"
@@ -45,25 +80,6 @@ log "PERCENTSPACE: $PERCENTSPACE"
 
 UPTIME=$($ADB uptime | tr -d '\r')
 log "UPTIME: $UPTIME"
-
-PINGRESULT=$($ADB ping -c 1 google.com | tr -d '\n' | tr -d '\r')
-log "PINGRESULT: $PINGRESULT"
-
-PINGERROR=$?
-log "PINGERROR: $PINGERROR"
-
-if [ $PINGERROR -eq 0 ]; then
-	NETWORK_STATUS="connected"
-else
-	NETWORK_STATUS="disconnected"
-fi
-log "NETWORK_STATUS: $NETWORK_STATUS"
-
-WIFI_SSID=$($ADB su 0 cat /data/misc/wifi/wpa_supplicant.conf | grep ssid | cut -d "\"" -f 2 | tr -d '\r')
-log "WIFI_SSID: $WIFI_SSID"
-
-WIFI_PASSWORD=$($ADB su 0 cat /data/misc/wifi/wpa_supplicant.conf | grep psk | cut -d "\"" -f 2 | tr -d '\r')
-log "WIFI_PASSWORD: $WIFI_PASSWORD"
 
 NUM_PHOTOS=$($ADB ls -all /sdcard/Pictures/Frameo | wc -l | tr -d '\r')
 log "NUM_PHOTOS: $NUM_PHOTOS"
@@ -86,3 +102,6 @@ curl --location --request POST "$SERVER_URL/frameStatus" \
     "num_photos": '$NUM_PHOTOS',
     "last_photo_update": "'"$LAST_PHOTO"'"
 }'
+
+# Log cron setup for diagnostics
+crontab -l
