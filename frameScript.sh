@@ -21,10 +21,11 @@ log "-----------------------------------------"
 DATE=$($ADB date +%s | tr -d '\r')
 log "DATE: $DATE"
 
-PINGRESULT=$($ADB ping -c 1 google.com | tr -d '\n' | tr -d '\r')
+PINGRESULT=$(ping -c 1 google.com)
+PINGERROR=$?
+PINGRESULT=$(echo "$PINGRESULT" | tr -d '\n' | tr -d '\r')
 log "PINGRESULT: $PINGRESULT"
 
-PINGERROR=$?
 log "PINGERROR: $PINGERROR"
 
 if [ $PINGERROR -eq 0 ]; then
