@@ -83,7 +83,7 @@ log "NUM_PHOTOS: $NUM_PHOTOS"
 LAST_PHOTO=$($ADB toybox ls -lt /sdcard/Pictures/Frameo | sed -n '2 p' | cut -d " " -f 6-7 | tr -d '\r')
 log "LAST_PHOTO: $LAST_PHOTO"
 
-adb tcpip 5555
+# adb tcpip 5555
 
 CURL=curl
 
