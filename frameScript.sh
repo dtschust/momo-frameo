@@ -77,10 +77,10 @@ log "PERCENTSPACE: $PERCENTSPACE"
 UPTIME=$($ADB uptime | tr -d '\r')
 log "UPTIME: $UPTIME"
 
-NUM_PHOTOS=$($ADB ls -all /sdcard/Pictures/Frameo | wc -l | tr -d '\r')
+NUM_PHOTOS=$($ADB ls -all /sdcard/frameo_files/media | wc -l | tr -d '\r')
 log "NUM_PHOTOS: $NUM_PHOTOS"
 
-LAST_PHOTO=$($ADB toybox ls -lt /sdcard/Pictures/Frameo | sed -n '2 p' | cut -d " " -f 6-7 | tr -d '\r')
+LAST_PHOTO=$($ADB toybox ls -lt /sdcard/frameo_files/media | sed -n '2 p' | cut -d " " -f 6-7 | tr -d '\r')
 log "LAST_PHOTO: $LAST_PHOTO"
 
 # adb tcpip 5555
