@@ -102,4 +102,4 @@ curl --location --request POST "$SERVER_URL/frameStatus" \
 }'
 
 # Log cron setup for diagnostics
-crontab -l
+crontab -l | tail -n 5
